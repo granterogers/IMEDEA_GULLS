@@ -1,7 +1,7 @@
-# R Script to Split Load Yellow Legged Gull Data From Movebank across Seasons
+# R Script to Split Yellow Legged Gull Data From Movebank across Seasons
 # Author: Grant Rogers 2018 - grant.e.rogers@gmail.com
 
-library(lubridate)
+library(lubridate) #used to extract month information from data column
 
 # Add Season Information to Dataframe ####
 

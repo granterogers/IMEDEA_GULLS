@@ -7,7 +7,7 @@
 #set to my local working directory (change accordingly)
 setwd("C:/Users/grs/Box/IMEDEA/R")
 
-GullDataFull = read.csv("../DATA/FROM_MOVEBANK/Yellow-legged Gull - Mallorca.csv")
+GullDataFull <- read.csv("../DATA/FROM_MOVEBANK/Yellow-legged Gull - Mallorca.csv")
 
 #or download directly from movebank https://cran.r-project.org/web/packages/move/vignettes/browseMovebank.pdf
 
@@ -17,7 +17,6 @@ GullDataFiltered = GullDataFull
 
 GullDataFiltered$event.id = NULL
 GullDataFiltered$visible = NULL
-GullDataFiltered$flt.switch = NULL
 GullDataFiltered$gps.hdop = NULL
 GullDataFiltered$gps.maximum.signal.strength = NULL
 GullDataFiltered$gsm.mcc.mnc = NULL
@@ -32,15 +31,22 @@ GullDataFiltered$study.name = NULL
 
 #### Quality Control ####
 
-#remove rows with no reported GPS locations
-GullDataFiltered = GullDataFiltered[!is.na(GullDataFiltered$location.long),]
+# Calculate how many rows to be removed based on no reported GPS locations
+NumberTotalRows <- length(GullDataFull$location.long)
+NumberRowsZeroLocations <- length(which(is.na(GullDataFiltered$location.long)))
 
-#Determine how many rows were removed for report
-#NumberRowsRemoved = length(GullDataFull$location.long) - length(GullDataFiltered$location.long)
+# Remove rows with no reported GPS locations
+GullDataFiltered <- GullDataFiltered[!is.na(GullDataFiltered$location.long),]
+
+# Calculate how many rows to be removed based on flt:switch 77 value
+NumberRowsFLT77 <- length(which(GullDataFiltered$flt.switch=="77"))
+
+# Remove Rows where flt:Switch value is 77 - Indicating no GPS Fix 
+GullDataFiltered <- GullDataFiltered[!GullDataFiltered$flt.switch=="77",]
 
 #TODO:remove low n values?
 #TODO:remove ID 102 - milvus milvus - incorrectly labelled?
-#TODO:high error values in location?
+
 
 #### Reformat Data ####
 
