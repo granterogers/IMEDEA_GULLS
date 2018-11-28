@@ -2,18 +2,18 @@
 # And perform basic filtering and quality control checks
 # Author: Grant Rogers 2018 - grant.e.rogers@gmail.com
 
-#### Import Movebank Data ####
+# Import Movebank Data ####
 
 #set to my local working directory (change accordingly)
 setwd("C:/Users/grs/Box/IMEDEA/R")
 
+#TODO: Download directly from movebank https://cran.r-project.org/web/packages/move/vignettes/browseMovebank.pdf
+
 GullDataFull <- read.csv("../DATA/FROM_MOVEBANK/Yellow-legged Gull - Mallorca.csv")
 
-#or download directly from movebank https://cran.r-project.org/web/packages/move/vignettes/browseMovebank.pdf
+# Remove unneeded columns from data frame ####
 
-#### Remove unneeded columns ####
-
-GullDataFiltered = GullDataFull
+GullDataFiltered <- GullDataFull
 
 GullDataFiltered$event.id = NULL
 GullDataFiltered$visible = NULL
@@ -29,7 +29,7 @@ GullDataFiltered$tag.voltage = NULL
 GullDataFiltered$study.name = NULL
 
 
-#### Quality Control ####
+# Quality Control ####
 
 # Calculate how many rows to be removed based on no reported GPS locations
 NumberTotalRows <- length(GullDataFull$location.long)
@@ -44,11 +44,18 @@ NumberRowsFLT77 <- length(which(GullDataFiltered$flt.switch=="77"))
 # Remove Rows where flt:Switch value is 77 - Indicating no GPS Fix 
 GullDataFiltered <- GullDataFiltered[!GullDataFiltered$flt.switch=="77",]
 
+# Remove Duplicate Rows (if any)
+NumberDuplicateRows <- length(which(duplicated(GullDataFiltered)==TRUE))
+GullDataFiltered <- GullDataFiltered[!duplicated(GullDataFiltered), ]
+# Remove Duplicate Rows of TimeStamp
+NumberDuplicateTimestamp <- length(which(duplicated(GullDataFiltered[,c("timestamp")]))==TRUE)
+GullDataFiltered <- GullDataFiltered[!duplicated(GullDataFiltered[,c("timestamp")]),]
+
 #TODO:remove low n values?
 #TODO:remove ID 102 - milvus milvus - incorrectly labelled?
+#TODO:add duplicate row check (redundent but useful)
 
-
-#### Reformat Data ####
+# Reformat Key Columns ####
 
 # Create timestamp in numeric format (maybe not needed)
 # GullDataFiltered$timestamp.numeric = as.numeric(as.POSIXct(as.character(GullDataFiltered$timestamp),format="%Y-%m-%d %H:%M:%S"))
@@ -62,9 +69,5 @@ colnames(GullDataFiltered)[colnames(GullDataFiltered) == 'individual.local.ident
 # Place ID column first in data frame
 GullDataFiltered = GullDataFiltered[,c(which(colnames(GullDataFiltered)=="ID"),which(colnames(GullDataFiltered)!="ID"))]
 
-#### Provide Useful MetaData ####
-
-Min.Lon <- min(GullDataFiltered$location.long)
-Max.Lon <- max(GullDataFiltered$location.long)
-Min.Lat <- min(GullDataFiltered$location.lat)
-Max.Lat <- max(GullDataFiltered$location.lat)
+# Rebuild Index: Row Numbers Reset
+rownames(GullDataFiltered) <- 1:nrow(GullDataFiltered)
